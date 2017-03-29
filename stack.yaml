@@ -1,0 +1,32 @@
+resolver: nightly-2017-03-27
+
+packages:
+- '.'
+# - '/Users/ababkin/work/qmuli'
+- location:
+    git: https://github.com/ababkin/qmuli.git
+    commit: b38c83ee473fee35c23406c201a671bd838a2753
+# - location:
+    # git: https://github.com/frontrowed/stratosphere.git
+    # commit: 538041ec37a67877776d23f3b84cfc26fe0d0e47
+- location:
+    git: https://github.com/abailly/system-extra.git
+    commit: 6223138579dc3473cbf84fa323af64380db114cf
+# - location:
+    # git: https://github.com/ababkin/amazonka-s3-streaming.git
+    # commit: f6b81ee546e7c12231a4e8d2893749de68f2b1cb
+    
+extra-deps: []
+
+flags: {}
+
+extra-package-dbs: []
+
+ghc-options:
+  "*": 
+    # -funfolding-use-threshold=16 -O2 -optc-O3
+    -O
+    -W 
+    -Wno-unused-imports 
+    -Wno-unused-matches 
+    -Wno-unused-do-bind

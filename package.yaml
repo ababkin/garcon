@@ -1,0 +1,30 @@
+name: garcon
+version: "0.0.1"
+description: lunch ordering app
+maintainer: Alex Babkin
+stability: experimental
+license: MIT
+
+extra-source-files:
+  - README.md
+  - stack.yaml
+
+
+
+executables:
+  garcon:
+    main: Main.hs
+    source-dirs: app
+    dependencies:
+      - aeson >= 1.1 && < 1.2
+      - amazonka-dynamodb >= 1.4.5 && < 1.5
+      - base >= 4.8 && < 5
+      - data-default >= 0.7 && < 0.8
+      - hashable >= 1.2 && < 1.3
+      - lens >= 4.15 && < 4.16
+      - qmuli >= 0.1
+      - text
+      - time >= 1.6
+      - unordered-containers
+    buildable: true
+

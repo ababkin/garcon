@@ -1,0 +1,8 @@
+*.stack-work/
+*.cabal
+.cidfile
+index.js
+lambda
+*.zip
+garcon
+tests/artifacts/*
