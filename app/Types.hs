@@ -19,14 +19,20 @@ import           Qi.Util.DDB
 
 data Order = Order {
     datestamp :: Text
+  , timestamp :: Int
   , name      :: Text
   , desc      :: Text
-} deriving (Generic, Show)
+} deriving (Generic, Show, Eq)
 instance FromJSON Order where
   parseJSON (Object o) = Order
     <$> pure ""
+    <*> pure (-1)
     <*> o .: "user_name"
     <*> o .: "text"
+instance Ord Order where
+  Order{timestamp = ts1} `compare` Order{timestamp = ts2}
+    = ts1 `compare` ts2
+
 
 data OrderList = OrderList { unOrderList :: [Order] }
 instance ToJSON OrderList where
@@ -37,15 +43,17 @@ instance ToJSON OrderList where
 
 instance FromAttrs Order where
   parseAttrs hm = Order
-    <$> parseStringAttr "datestamp"   hm
-    <*> parseStringAttr "name"  hm
-    <*> parseStringAttr "desc"  hm
+    <$> parseStringAttr "datestamp" hm
+    <*> parseNumberAttr "timestamp" hm
+    <*> parseStringAttr "name"      hm
+    <*> parseStringAttr "desc"      hm
 
 instance ToAttrs Order where
-  toAttrs Order{datestamp, name, desc} = [
-                    ("datestamp",   stringAttr datestamp)
-                  , ("name",  stringAttr name)
-                  , ("desc",  stringAttr desc)
+  toAttrs Order{datestamp, timestamp, name, desc} = [
+                    ("datestamp", stringAttr datestamp)
+                  , ("timestamp", numberAttr timestamp)
+                  , ("name",      stringAttr name)
+                  , ("desc",      stringAttr desc)
                   ]
 
 

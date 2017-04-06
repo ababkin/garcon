@@ -11,9 +11,12 @@ import           Control.Monad                   (forM)
 import           Data.Aeson
 import           Data.Default                    (def)
 import qualified Data.HashMap.Strict             as SHM
+import           Data.List                       (sort)
 import           Data.Text                       (Text)
 import qualified Data.Text                       as T
-import           Data.Time.Clock                 (UTCTime)
+import           Data.Time.Calendar              (fromGregorian)
+import           Data.Time.Clock                 (UTCTime (UTCTime),
+                                                  diffUTCTime)
 import           Data.Time.Format
 import           Network.AWS.DynamoDB.DeleteItem
 import           Network.AWS.DynamoDB.GetItem
@@ -92,9 +95,8 @@ main = withConfig config
 
       return ()
 
-    getTodaysOrders
-      :: DdbTableId
-      -> ApiLambdaProgram
+    getTodaysOrders :: DdbTableId
+                    -> ApiLambdaProgram
     getTodaysOrders ddbTableId event = do
         today <- getToday
         say $ T.concat ["getting orders put on date: '", today, "'..."]
@@ -102,7 +104,7 @@ main = withConfig config
         withSuccess (r^.qrsResponseStatus) $
           result
             (internalError . ("Parsing error: " ++))
-            (success . toJSON . OrderList)
+            (success . toJSON . OrderList . sort)
             $ forM (r^.qrsItems) parseAttrs
       where
         keyCond = Just $ T.concat ["datestamp = :datestamp"]
@@ -110,14 +112,17 @@ main = withConfig config
 
 
 
-    put
-      :: DdbTableId
-      -> ApiLambdaProgram
+    put :: DdbTableId
+        -> ApiLambdaProgram
     put ddbTableId event =
       withDeserializedBody event $ \(order :: Order) -> do
         today <- getToday
+        now   <- getEpocTimestamp
         say $ T.concat ["putting record: ", T.pack $ show order, "..."]
-        r <- putDdbRecord ddbTableId $ toAttrs order{ datestamp = today }
+        r <- putDdbRecord ddbTableId $ toAttrs order{
+            datestamp = today
+          , timestamp = now
+          }
         say $ T.concat ["...done"]
 
         withSuccess (r^.pirsResponseStatus) $
@@ -130,3 +135,14 @@ getToday = do
 
 
 
+getEpocTimestamp :: LambdaProgram Int
+getEpocTimestamp =
+  epochTime <$> getCurrentTime
+
+epochTime :: UTCTime
+          -> Int
+epochTime =
+  fromIntegral . floor . flip diffUTCTime epoch
+
+epoch :: UTCTime
+epoch = UTCTime (fromGregorian 1970 1 1) 0
